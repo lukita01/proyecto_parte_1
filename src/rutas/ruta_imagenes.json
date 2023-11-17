@@ -1,0 +1,15 @@
+[{"dir_imagen": "src/imagenes/imagen_ak.png", "tamanio_x": "90", "tamanio_y": "60"}, 
+{"dir_imagen": "src/imagenes/imagen_ak.png", "tamanio_x": "100", "tamanio_y": "70"}, 
+{"dir_imagen": "src/imagenes/personaje_rifle.png", "tamanio_x": "80", "tamanio_y": "80"}, 
+{"dir_imagen": "src/imagenes/personaje_pistola.png", "tamanio_x": "80", "tamanio_y": "80"}, 
+{"dir_imagen": "src/imagenes/zombie_normal.png", "tamanio_x": "60", "tamanio_y": "60"}, 
+{"dir_imagen": "src/imagenes/zombie_rojo.png", "tamanio_x": "80", "tamanio_y": "70"}, 
+{"dir_imagen": "src/imagenes/zombie_jefe.png", "tamanio_x": "100", "tamanio_y": "100"}, 
+{"dir_imagen": "src/imagenes/botiquin.png", "tamanio_x": "50", "tamanio_y": "40"}, 
+{"dir_imagen": "src/imagenes/botiquin.png", "tamanio_x": "60", "tamanio_y": "50"}, 
+{"dir_imagen": "src/imagenes/calle.jpg", "tamanio_x": "800", "tamanio_y": "600"}, 
+{"dir_imagen": "src/imagenes/gamer_over.jpg", "tamanio_x": "800", "tamanio_y": "600"}, 
+{"dir_imagen": "src/imagenes/menu_imagen.jpg", "tamanio_x": "800", "tamanio_y": "600"}, 
+{"dir_imagen": "src/imagenes/imagen_win.png", "tamanio_x": "800", "tamanio_y": "600"},
+{"dir_imagen": "src/imagenes/tutorial.png", "tamanio_x": "1000", "tamanio_y": "700"}]
+
