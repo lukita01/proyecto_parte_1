@@ -69,13 +69,25 @@ UL = 5
 lista_movientos = [DR, DL ,UR , UL]
 
 def cargar_imagenes_dict(lista:list, indice:int , clave_direccion:str ,clave_tamaño_x:str = None,clave_tamaño_y:str = None):
+        '''
+        Esta funcion recibe la lista: list de diccionarios:dict.\n
+        el indice:int  donde esta ubicado ese diccionario en la lista.\n
+        la clave: str del diccionario para acceder a la ruta donde esta ubicado ese archivo.\n
+        la clave del tamaño x: str donde se ubica el valor X.\n
+        la clave del tamaño y: str donde se ubica el valor y .\n
+        en caso que reciba sonidos no hace falta los tamaños.\n
+        si recibe imagenes retorna: pygame.transform.scale(pygame.image.load(lista[indice][clave_direccion]),(clave_tamaño_x,clave_tamaño_y))\n
+        si recibe sonidos retorna: pygame.mixer.Sound(lista[indice][clave_direccion])\n
+        esta funcion se puede llamar con cargar_imagenes_dict o cargar_sonido_dict.
+        '''''
         if clave_tamaño_x:
             clave_tamaño_x = int(lista[indice][clave_tamaño_x])
             clave_tamaño_y = int(lista[indice][clave_tamaño_y])
             return pygame.transform.scale(pygame.image.load(lista[indice][clave_direccion]),(clave_tamaño_x,clave_tamaño_y))
         else:
             return pygame.mixer.Sound(lista[indice][clave_direccion])     
-         
+cargar_sonido_dict = cargar_imagenes_dict
+
 with open(os.path.join(dir_actual, "src/rutas/ruta_imagenes.json"), "r") as file:
     lista_imagenes = json.load(file)    
 
@@ -87,8 +99,6 @@ with open(os.path.join(dir_actual,"src/rutas/ruta_sonidos.csv"),"r") as file:
         valor = valor.strip()
         diccionario[encabezado] = valor
         lista_sonidos[i] = diccionario
-
-cargar_sonido_dict = cargar_imagenes_dict
 
 #CARGO LA MUSICA
 sonido_rifle = cargar_sonido_dict(lista_sonidos, 0, "dir_sonido")

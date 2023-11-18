@@ -17,10 +17,9 @@ try:
 except:
     puntaje_maximo = [{"puntaje_maximo":"0"}]
 
-
 while True:
     pantalla.blit(imagen_fondo_inicio,(0,0))
-    #musica_juego.play(-1)
+    musica_juego.play(-1)
     crear_boton(pantalla, "PLAY", blanco, rect_btn_play, rojo, rojo, fuente)
     crear_boton(pantalla, "EXIT", blanco, rect_btn_exit, rojo, rojo, fuente)
     y =  pantalla_inicio(rect_btn_play,rect_btn_exit)
@@ -77,7 +76,6 @@ while True:
             pygame.mouse.set_visible(False)
 
             while correr_progama:
-                print(len(rafagas))
                 clock.tick((60))
                 for evento in pygame.event.get():
 
@@ -290,7 +288,7 @@ while True:
                 if contador_vidas == 0:
                     correr_progama = False
 
-                if  contador_continuar == 0 and score > 16 and  len(lista_zombies_jefes) == 0:
+                if  contador_continuar == 0 and score > 10 and  len(lista_zombies_jefes) == 0:
                     correr_progama = False
 
                 #CREAR LAS ORDAS DE ZOMBIES
@@ -302,7 +300,7 @@ while True:
                     if contador_continuar == 0:
                         contador_general = 0
 
-                if  contador_continuar == 0 and score == 50 and len(lista_zombies_jefes) == 0 :
+                if  contador_continuar == 0 and score == 10 and len(lista_zombies_jefes) == 0 :
                     crear_orda_zombies(lista_zombies_jefes, cantidad_zombies_jefes, imagen_zombie_jefe, pantalla,vida_zombie_jefe)
 
                 elif contador_continuar == 1 and  contador_general == 20 and len(lista_zombies_jefes) == 0:
@@ -358,12 +356,12 @@ while True:
                 with open(os.path.join("src/rutas/puntaje_maximo.json") , "w") as archivo:
                     json.dump(puntaje_maximo, archivo)
                     
-            #musica_juego.stop()
+            musica_juego.stop()
 
             pygame.mouse.set_visible(True)
             pygame.display.flip()
 
-            if score > 50 and contador_continuar == 0: 
+            if score > 10 and contador_continuar == 0: 
                 pantalla.fill((0,0,0))
                 pantalla.blit(imagen_fondo_win,(0,0))
 
@@ -402,6 +400,6 @@ while True:
                     correr_progama = True    
                           
 
-            #musica_juego.play()
+            musica_juego.play()
         
 
