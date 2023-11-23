@@ -11,7 +11,7 @@ def color_random() ->tuple:
     retorna una tupla de 3 elementos
     con numeros randoms \n
     se usa para retornar un color random\n
-    return ->  tupla (r , g , b)
+    return ->  tupla (r , g , b).
     """
     from random import randrange
     r = randrange(256)
