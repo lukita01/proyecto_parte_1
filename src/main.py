@@ -4,9 +4,9 @@ from pygame.locals import *
 from funciones import*
 import json
 import os
-from clean_code.movimientos import* 
-from clean_code.eventos import * 
-from clean_code.colisiones import *
+from modularizacion.movimientos import* 
+from modularizacion.eventos import * 
+from modularizacion.colisiones import *
 pygame.init()
 pygame.display.set_caption("primer juego")
 clock = pygame.time.Clock()
@@ -76,9 +76,9 @@ while True:
                 movimiento_personaje_principal(dict_movimientos, personaje_rifle, speed_personaje)
 
                 #MOVIENTO DE LOS ZOMBIES
-                movimiento_zombies(lista_zombies_normales, speed_zombie_normal , dict_contadores["contador_vidas"] )
-                movimiento_zombies_rojos(lista_zombies_rojos, speed_zombie_rojo , dict_contadores["contador_vidas"] )     
-                movimiento_zombies_jefes(lista_zombies_jefes, speed_zombie_jefe , dict_contadores["contador_vidas"] )       
+                movimiento_zombies(lista_zombies_normales, speed_zombie_normal , dict_contadores )
+                movimiento_zombies_rojos(lista_zombies_rojos, speed_zombie_rojo , dict_contadores )     
+                movimiento_zombies_jefes(lista_zombies_jefes, speed_zombie_jefe , dict_contadores )       
 
                 # MOVIENTO DE DISPARO
                 movimiento_disparos(rafagas)    

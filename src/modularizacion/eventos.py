@@ -76,13 +76,13 @@ def evento_mouse_disparos(evento:pygame.event ,dict_armas:dict , personaje_rifle
         if evento.button == 1:
             if  dict_armas["mostrar_pistola"] and dict_eventos_tiempo["disparo"]:
                 rafagas.append(crear_disparo(personaje_rifle["recta"].midtop,velocidad_disparo))  
-                #sonido_pistola.play()
+                sonido_pistola.play()
                 dict_eventos_tiempo["disparo"] = False
 
             elif dict_armas["mostrar_rifle"] and dict_eventos_tiempo["disparos"]:
                 dict_contadores["municion_ak"] -= 1    
                 rafagas.append(crear_disparo(personaje_rifle["recta"].midtop,velocidad_disparo)) 
-                #sonido_rifle.play()    
+                sonido_rifle.play()    
                 dict_eventos_tiempo["disparos"] = False
                 if dict_contadores["municion_ak"] == 0:
                     dict_armas["mostrar_pistola"] = True

@@ -11,12 +11,12 @@ def movimiento_personaje_principal(dict_movimientos:dict, personaje_rifle:dict, 
     elif dict_movimientos["mover_izquierda"] and personaje_rifle["recta"].left > 0 :
         personaje_rifle["recta"].left -= speed_personaje
 
-def movimiento_zombies(lista_zombies:list, speed:int, contador_vidas:int):
+def movimiento_zombies(lista_zombies:list, speed:int, dict_contadores:dict):
     for zombie in lista_zombies:
         if zombie["recta"].top < alto:
             zombie["recta"].top += speed
         else:
-            contador_vidas -=1
+            dict_contadores["contador_vidas"] -=1
             lista_zombies.remove(zombie)
 movimiento_zombies_rojos = movimiento_zombies
 movimiento_zombies_jefes = movimiento_zombies
