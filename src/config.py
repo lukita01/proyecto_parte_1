@@ -60,16 +60,12 @@ vida_zombie_normal = 2
 vida_zombie_rojo = 3
 vida_zombie_jefe = 6
 
-# DIRECCIONES DE MOVIMIENTO
-DR = 2
-DL = 3
-UR = 4
-UL = 5
-
-lista_movientos = [DR, DL ,UR , UL]
+speed_zombie_normal = 2
+speed_zombie_rojo = 1
+speed_zombie_jefe = 1
 
 def cargar_imagenes_dict(lista:list, indice:int , clave_direccion:str ,clave_tamaño_x:str = None,clave_tamaño_y:str = None):
-        '''
+        ''''
         Esta funcion recibe la lista: list de diccionarios:dict.\n
         el indice:int  donde esta ubicado ese diccionario en la lista.\n
         la clave: str del diccionario para acceder a la ruta donde esta ubicado ese archivo.\n

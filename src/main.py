@@ -4,16 +4,16 @@ from pygame.locals import *
 from funciones import*
 import json
 import os
-
+from clean_code.movimientos import* 
+from clean_code.eventos import * 
+from clean_code.colisiones import *
 pygame.init()
-
 pygame.display.set_caption("primer juego")
-
 clock = pygame.time.Clock()
+
 try:
     with open(os.path.join(dir_actual,"src/rutas/puntaje_maximo.json") , "r") as archivo:
         puntaje_maximo = json.load(archivo)
-       
 except:
     puntaje_maximo = [{"puntaje_maximo":"0"}]
 
@@ -22,20 +22,17 @@ while True:
     musica_juego.play(-1)
     crear_boton(pantalla, "PLAY", blanco, rect_btn_play, rojo, rojo, fuente)
     crear_boton(pantalla, "EXIT", blanco, rect_btn_exit, rojo, rojo, fuente)
-    y =  pantalla_inicio(rect_btn_play,rect_btn_exit)
-    if y == 1:
+    respuesta =  pantalla_inicio(rect_btn_play,rect_btn_exit)
+    if respuesta == 1:
         respawn = True
-    elif y == 2:
+    elif respuesta == 2:
         terminar()
 
     pantalla.blit(imagen_fondo_tutorial,(0,0))
-
     if mostrar_tutorial: 
         pausa_tutorial()
-
     mostrar_tutorial = False
     while respawn:
-
         pygame.time.set_timer(EVENTO_NUEVO_BOTIQUIN,8000) 
         pygame.time.set_timer(EVENTO_RESPAWN_AK,17000)
         pygame.time.set_timer(EVENTO_TIEMPO_DISPARO , 350)
@@ -43,34 +40,22 @@ while True:
         pygame.time.set_timer(EVENTO_EFECTO_RESPAWN,350)
         pygame.time.set_timer(EVENTO_ELIMINAR_AK,20000)
         pygame.time.set_timer(EVENTO_ELIMINAR_BOTIQUIN,11000)
-        flag = True
-        ak_disponible = None
-        botiquin = None
-        mover_abajo = False
-        mover_arriba = False
-        mover_derecha = False
-        mover_izquierda = False
         cantidad_zombies_principio = 10
-        contador_general = 0
-        score = 0
-        contador_vidas = 3
-        rafaga_anterior = None
-        mostrar_pistola = True
-        mostrar_rifle = False
         lista_zombies_rojos = []
         lista_zombies_normales = []
         lista_zombies_jefes = []
-        disparo = False
-        disparos = False
-        rafagas = []	
-        municion_ak = 0
-        efecto = False
-        contador_continuar = 0
+        rafagas = []
         correr_progama = True
         continuar_jugando = True
+        dict_movimientos = {"mover_abajo":False, "mover_arriba":False , "mover_derecha":False ,"mover_izquierda":False} 
+        dict_armas = {"mostrar_rifle":False, "mostrar_pistola":True}
+        dict_eventos_tiempo = {"disparo":False, "disparos":False, "botiquin":None , "ak_disponible":None , "efecto": False} 
+        dict_contadores = {"score":0, "contador_general":0, "contador_continuar":0, "contador_vidas": 3,  "municion_ak":0}
+        rafaga_anterior = {"rafaga_anterior":None}
         personaje_rifle = personaje_principal(imagen_personaje_rifle,pantalla)
         personaje_pistola = personaje_principal(imagen_personaje_pistola,pantalla)
         crear_orda_zombies(lista_zombies_normales, cantidad_zombies_principio,imagen_zombie_normal,pantalla,vida_zombie_normal)
+
         pygame.mouse.set_visible(False)
         while continuar_jugando:
             pygame.mouse.set_visible(False)
@@ -78,234 +63,80 @@ while True:
             while correr_progama:
                 clock.tick((60))
                 for evento in pygame.event.get():
+                    # CAPTURA LOS EVENTOS DE TECLADO DEL PERSONAJE 
+                    evento_movimientos_personaje(evento , dict_movimientos ,  personaje_rifle)
+                    # CAPTURA LOS EVENTOS DE CAMBIO DE ARMA CON LOS BOTONES
+                    evento_cambio_de_arma(evento, dict_armas, dict_contadores["municion_ak"])
+                    # CAPTURA TODOS LOS EVENTOS DE TIEMPO COMO RESPAW DE BOTIQUINES,AK,ETC...
+                    eventos_de_tiempo( evento, dict_eventos_tiempo)
+                    #CAPTURA LOS CLICKS DE DISPAROS CON EL MOUSE
+                    evento_mouse_disparos(evento , dict_armas, personaje_rifle, rafagas , dict_eventos_tiempo ,dict_contadores)
 
-                    if evento.type == QUIT:
-                        terminar()
+                # CON LOS MOVIEMIENTOS DE LOS EVENTOS MUEVE AL PERSONAJE.
+                movimiento_personaje_principal(dict_movimientos, personaje_rifle, speed_personaje)
 
-                    if evento.type == KEYDOWN:
-                        if evento.key == K_UP or evento.key == K_w:
-                            mover_arriba = True
-                            mover_abajo = False
-                        if evento.key == K_DOWN or evento.key == K_s:
-                            mover_abajo = True
-                            mover_arriba = False
-                        if evento.key == K_RIGHT or evento.key == K_d:
-                            mover_derecha = True
-                            mover_izquierda = False
-                        if evento.key == K_LEFT or evento.key == K_a:
-                            mover_izquierda = True
-                            mover_derecha = False
-
-                        if evento.key == K_2 and municion_ak > 0 :
-                            mostrar_pistola = False
-                            mostrar_rifle = True
-
-                        if evento.key == K_1: 
-                            mostrar_rifle = False   
-                            mostrar_pistola = True
-
-                        if evento.key == K_p:
-                            pausa()        
-
-                    if evento.type == KEYUP:
-                        if evento.key == K_UP or evento.key == K_w:
-                            mover_arriba = False
-                        if evento.key == K_DOWN or evento.key == K_s:
-                            mover_abajo = False
-                        if evento.key == K_RIGHT or evento.key == K_d:
-                            mover_derecha = False
-                        if evento.key == K_LEFT or evento.key == K_a:
-                            mover_izquierda = False
-
-                    if evento.type == EVENTO_TIEMPO_DISPARO:
-                        disparo = True
-                    if evento.type == EVENTO_TIEMPO_RAFAGA:
-                        disparos = True    
-
-                    #CLICK CREAR UN DISPARO o MODO RAFAGA
-
-                    if evento.type == MOUSEBUTTONDOWN:       
-                        if evento.button == 1:
-                            if mostrar_pistola and disparo:
-                                rafagas.append(crear_disparo(personaje_rifle["recta"].midtop,velocidad_disparo))  
-                                sonido_pistola.play()
-                                disparo = False
-
-                            elif mostrar_rifle and disparos:
-                                municion_ak -= 1
-                                rafagas.append(crear_disparo(personaje_rifle["recta"].midtop,velocidad_disparo)) 
-                                sonido_rifle.play()    
-                                disparos = False
-                                if municion_ak == 0:
-                                    mostrar_pistola = True
-                                    mostrar_rifle = False
-
-                    #CREO EL BOTIQUIN CON UN EVENTO DE TIEMPO            
-                    if evento.type == EVENTO_NUEVO_BOTIQUIN:
-                        botiquin = crear_botiquin(imagen_botiquin,pantalla)
-                    
-                    if evento.type == EVENTO_RESPAWN_AK:
-                        ak_disponible = crear_botiquin(imagen_ak,pantalla)
-
-                    if evento.type == EVENTO_ELIMINAR_AK:
-                        ak_disponible = None
-                    
-                    if evento.type == EVENTO_ELIMINAR_BOTIQUIN:
-                        botiquin = None
-                            
-                    if evento.type == EVENTO_EFECTO_RESPAWN:
-                        efecto = not efecto
-
-                # MOVIENTO DE TODOS LOS PERSONAJES
-                if mover_arriba and personaje_rifle["recta"].top > 0:
-                    personaje_rifle["recta"].top -= speed_personaje
-                elif mover_abajo and personaje_rifle["recta"].bottom < alto:
-                    personaje_rifle["recta"].top += speed_personaje      
-                if mover_derecha and personaje_rifle["recta"].right < ancho:
-                    personaje_rifle["recta"].left += speed_personaje
-                elif mover_izquierda and personaje_rifle["recta"].left > 0 :
-                    personaje_rifle["recta"].left -= speed_personaje    
-
-                #MOVIENTO DE LOS ZOMBIES         
-                for zombie in lista_zombies_normales:
-                    if zombie["recta"].top < alto:
-                        zombie["recta"].top += 2
-                    else:
-                        contador_vidas -=1
-                        lista_zombies_normales.remove(zombie)
-
-                for zombie_rojo in lista_zombies_rojos:
-                    if zombie_rojo["recta"].top < alto:
-                        zombie_rojo["recta"].top += 1
-                    else:
-                        contador_vidas -=1  
-                        lista_zombies_rojos.remove(zombie_rojo)
-
-                for zombie_jefe in lista_zombies_jefes:
-                    if zombie_jefe["recta"].top < alto:
-
-                        zombie_jefe["recta"].top += 1
-                    else:
-                        contador_vidas -=1
-                        lista_zombies_jefes.remove(zombie_jefe)
+                #MOVIENTO DE LOS ZOMBIES
+                movimiento_zombies(lista_zombies_normales, speed_zombie_normal , dict_contadores["contador_vidas"] )
+                movimiento_zombies_rojos(lista_zombies_rojos, speed_zombie_rojo , dict_contadores["contador_vidas"] )     
+                movimiento_zombies_jefes(lista_zombies_jefes, speed_zombie_jefe , dict_contadores["contador_vidas"] )       
 
                 # MOVIENTO DE DISPARO
-                for rafaga in rafagas:
-                    rafaga["recta"].bottom -= rafaga["speed"]        
+                movimiento_disparos(rafagas)    
 
-                #DETECTO LAS COLISIONES DE LOS DISPAROS CON LOS ZOMBIES Y LOS ELIMINO, AUMENTO SCORE.
+                #DETECTO LAS COLISIONES DE LOS DISPAROS CON LOS ZOMBIES Y LOS ELIMINO, AUMENTO SCORE.s
                 if rafagas:
                     for rafaga in rafagas[:]:
-                        for zombie in lista_zombies_normales[:]:
-                            if zombie["recta"].colliderect(rafaga["recta"]):
-                                zombie["vida"] -=1
-                                try:
-                                    rafagas.remove(rafaga)  
-                                    rafaga_anterior = rafaga  
-                                except:    
-                                    if rafaga_anterior != rafaga:
-                                        rafagas.remove(rafaga)
-                                        rafaga_anterior = rafaga
-                            if zombie["vida"] == 0:
-                                lista_zombies_normales.remove(zombie)
-                                score +=1
-                                contador_general +=1  
+                        detecta_colision_de_disparo_zombie_normal(
+                            rafagas, rafaga, lista_zombies_normales, dict_contadores , rafaga_anterior)
 
-                        for zombie_rojo in lista_zombies_rojos[:]:
-                            if zombie_rojo["recta"].colliderect(rafaga["recta"]):
-                                zombie_rojo["vida"] -=1
-                                try:
-                                    rafagas.remove(rafaga)
-                                    rafaga_anterior = rafaga    
-                                except:    
-                                    if rafaga_anterior != rafaga:
-                                        rafagas.remove(rafaga)
-                            if zombie_rojo["vida"] == 0:
-                                lista_zombies_rojos.remove(zombie_rojo)
-                                score +=1
-                                contador_general +=1
-                                
-                        for zombie_jefe in lista_zombies_jefes[:]:
-                            if zombie_jefe["recta"].colliderect(rafaga["recta"]):
-                                zombie_jefe["vida"] -=1
-                                try:
-                                    rafagas.remove(rafaga)
-                                    rafaga_anterior = rafaga    
-                                except:    
-                                    if rafaga_anterior != rafaga:
-                                        rafagas.remove(rafaga)
-                            if zombie_jefe["vida"] == 0:
-                                lista_zombies_jefes.remove(zombie_jefe)
-                                score +=1
-                                if contador_continuar == 1:
-                                    contador_general += 1
+                        detecta_colision_de_disparo_zombie_rojo(
+                            rafagas, rafaga, lista_zombies_rojos, dict_contadores , rafaga_anterior)
 
-                        #ELIMINO EL DISPARO SI SALIO DE LA PANTALLA        
-                        if rafaga["recta"].bottom <= 0:
-                            try:
-                                rafagas.remove(rafaga)
-                                rafaga_anterior = rafaga  
-                            except:
-                                if rafaga_anterior != rafaga:
-                                    rafagas.remove(rafaga)
-                                                    
-                    
-                #COLISION DE PERSONAJES CON ZOMBIES Y PERDIDA DE VIDA
-                for zombie in lista_zombies_normales:
-                    if personaje_rifle["mascara"].overlap(zombie["mascara"], offset(zombie["recta"],personaje_rifle["recta"])):
-                        zombie["vida"] -=1
-                        if zombie["vida"] == 0:
-                            lista_zombies_normales.remove(zombie)
-                            contador_vidas -=1
+                        detecta_colision_de_disparo_zombie_jefe(
+                            rafagas, rafaga, lista_zombies_jefes, dict_contadores , rafaga_anterior)
+                                                         
+                #COLISION DE PERSONAJE CON ZOMBIES Y PERDIDA DE VIDA
+                detecta_colision_zombie_normal(
+                    lista_zombies_normales, personaje_rifle, offset, dict_contadores)
+                
+                detecta_colision_zombie_rojo(
+                    lista_zombies_rojos, personaje_rifle, offset, dict_contadores)
+                
+                detecta_colision_zombie_jefe(
+                    lista_zombies_jefes, personaje_rifle, offset, dict_contadores)
+               
 
-                for zombie_rojo in lista_zombies_rojos:
-                    if personaje_rifle["mascara"].overlap(zombie_rojo["mascara"], offset(zombie_rojo["recta"],personaje_rifle["recta"])):
-                        zombie_rojo["vida"] -=1
-                        if zombie_rojo["vida"] == 0:
-                            lista_zombies_rojos.remove(zombie_rojo)
-                            contador_vidas -=1 
+                # DETECTA COLISION DE EL PERSONAJE CON UN BOTIQUIN 
+                detecta_colision_botiquin(
+                    dict_eventos_tiempo, offset , personaje_rifle, dict_contadores)
 
-                for zombie_jefe in lista_zombies_jefes:
-                    if personaje_rifle["mascara"].overlap(zombie_jefe["mascara"], offset(zombie_jefe["recta"],personaje_rifle["recta"])):
-                        zombie_jefe["vida"] -=1
-                        if zombie_jefe["vida"] == 0:
-                            lista_zombies_jefes.remove(zombie_jefe)
-                            contador_vidas -=1
+                # DETECTA COLISION DE EL PERSONAJE CON UN AK
+                detecta_colision_ak(
+                    dict_eventos_tiempo, personaje_rifle, offset , dict_contadores, dict_armas)
 
-                if botiquin:
-                    if personaje_rifle["mascara"].overlap(botiquin["mascara"], offset(botiquin["recta"],personaje_rifle["recta"])):
-                        botiquin = None 
-                        if contador_vidas < 5:   
-                            contador_vidas +=1
-
-                if ak_disponible:
-                    if personaje_rifle["mascara"].overlap(ak_disponible["mascara"], offset(ak_disponible["recta"],personaje_rifle["recta"])):
-                        municion_ak = 60
-                        mostrar_rifle = True
-                        mostrar_pistola = False
-                        ak_disponible = None 
-                                
-                if contador_vidas == 0:
+                # SI EL CONTADOR DE VIDAS LLEGA A 0 SE CIERRA EL PROGAMA PERDIENDO LA PARTIDA               
+                if dict_contadores["contador_vidas"] == 0:
                     correr_progama = False
 
-                if  contador_continuar == 0 and score > 10 and  len(lista_zombies_jefes) == 0:
+                # OBJETIVO PARA GANAR
+                if  dict_contadores["contador_continuar"] == 0 and dict_contadores['score'] > 20 and  len(lista_zombies_jefes) == 0:
                     correr_progama = False
 
                 #CREAR LAS ORDAS DE ZOMBIES
                 if len(lista_zombies_normales) == 0:
                     crear_orda_zombies(lista_zombies_normales, cantidad_zombies_principio, imagen_zombie_normal, pantalla,vida_zombie_normal)
                     
-                if contador_general == 10 and len(lista_zombies_rojos) == 0:    
+                if dict_contadores["contador_general"] == 10 and len(lista_zombies_rojos) == 0:    
                     crear_orda_zombies(lista_zombies_rojos, cantidad_zombies_rojos, imagen_zombie_rojo, pantalla,vida_zombie_rojo)
-                    if contador_continuar == 0:
-                        contador_general = 0
+                    if dict_contadores["contador_continuar"] == 0:
+                       dict_contadores["contador_general"] = 0
 
-                if  contador_continuar == 0 and score == 10 and len(lista_zombies_jefes) == 0 :
+                if  dict_contadores["contador_continuar"] == 0 and dict_contadores["score"] == 20 and len(lista_zombies_jefes) == 0 :
                     crear_orda_zombies(lista_zombies_jefes, cantidad_zombies_jefes, imagen_zombie_jefe, pantalla,vida_zombie_jefe)
 
-                elif contador_continuar == 1 and  contador_general == 20 and len(lista_zombies_jefes) == 0:
+                elif dict_contadores["contador_continuar"] == 1 and  dict_contadores["contador_general"] == 20 and len(lista_zombies_jefes) == 0:
                     crear_orda_zombies(lista_zombies_jefes, cantidad_zombies_jefes, imagen_zombie_jefe, pantalla,vida_zombie_jefe)
-                    contador_general = 0
+                    dict_contadores["contador_general"] = 0
 
                 pantalla.blit(imagen_pantalla,(0,0))
 
@@ -313,17 +144,17 @@ while True:
                 for rafaga in rafagas:
                     pygame.draw.rect(pantalla, rafaga["color"], rafaga["recta"])
 
-                if botiquin:
-                    if efecto:
-                        pantalla.blit(imagen_botiquin_efecto, botiquin["recta"])
+                if dict_eventos_tiempo["botiquin"]:
+                    if dict_eventos_tiempo["efecto"]:
+                        pantalla.blit(imagen_botiquin_efecto, dict_eventos_tiempo["botiquin"]["recta"])
                     else:
-                        pantalla.blit(botiquin["imagen"], botiquin["recta"])
+                        pantalla.blit(dict_eventos_tiempo["botiquin"]["imagen"], dict_eventos_tiempo["botiquin"]["recta"])
 
-                if ak_disponible:
-                    if efecto:
-                        pantalla.blit(imagen_ak_efecto,ak_disponible["recta"]) 
+                if dict_eventos_tiempo["ak_disponible"]:
+                    if dict_eventos_tiempo["efecto"]:
+                        pantalla.blit(imagen_ak_efecto,dict_eventos_tiempo["ak_disponible"]["recta"]) 
                     else:    
-                        pantalla.blit(ak_disponible["imagen"],ak_disponible["recta"])   
+                        pantalla.blit(dict_eventos_tiempo["ak_disponible"]["imagen"],dict_eventos_tiempo["ak_disponible"]["recta"])   
 
                 # BLITEO TODOS LOS TIPOS DE ZOMBIES    
                 for zombie in lista_zombies_normales:
@@ -336,42 +167,39 @@ while True:
                     pantalla.blit(zombie_jefe["imagen"],zombie_jefe["recta"])    
 
                 #DIBUJO LA VIDA Y EL SCORE
-                mostrar_texto(pantalla,f" VIDA: {contador_vidas}",fuente_mas_chico,cordenada_arriba_derecha,rojo)
-                mostrar_texto(pantalla,f"SCORE: {score}",fuente_mas_chico,cordenada_arriba_izquierda,rojo)
+                mostrar_texto(pantalla,f" VIDA: {dict_contadores['contador_vidas']}",fuente_mas_chico,cordenada_arriba_derecha,rojo)
+                mostrar_texto(pantalla,f"SCORE: {dict_contadores['score']}",fuente_mas_chico,cordenada_arriba_izquierda,rojo)
 
-                if municion_ak:
-                    mostrar_texto(pantalla,f"municion {municion_ak}",fuente_mas_chico,cordenada_abajo_izquierda,rojo)
+                if dict_contadores["municion_ak"]:
+                    mostrar_texto(pantalla,f"municion { dict_contadores['municion_ak']}",fuente_mas_chico,cordenada_abajo_izquierda,rojo)
 
                 #BLITEO AL PERSONAJE PRINCIPAL
-                if mostrar_rifle:
+                if dict_armas["mostrar_rifle"] :
                     pantalla.blit(personaje_rifle["imagen"], personaje_rifle["recta"])
 
-                if mostrar_pistola:
+                if dict_armas["mostrar_pistola"]:
                     pantalla.blit(personaje_pistola["imagen"], personaje_rifle["recta"])
 
                 pygame.display.flip()
-
-            if score > int(puntaje_maximo[0]["puntaje_maximo"]):  
-                puntaje_maximo[0]["puntaje_maximo"] = str(score)
+            #EN EL CASO QUE EL SCORE ACTUAL SEA UN RECORD SE GUARDA EN UN ARCHIVO JSON
+            if dict_contadores['score'] > int(puntaje_maximo[0]["puntaje_maximo"]):  
+                puntaje_maximo[0]["puntaje_maximo"] = str(dict_contadores['score'])
                 with open(os.path.join("src/rutas/puntaje_maximo.json") , "w") as archivo:
                     json.dump(puntaje_maximo, archivo)
                     
             musica_juego.stop()
-
             pygame.mouse.set_visible(True)
             pygame.display.flip()
 
-            if score > 10 and contador_continuar == 0: 
+            if dict_contadores['score'] > 20 and len(lista_zombies_jefes) == 0 and dict_contadores["contador_continuar"] == 0: 
                 pantalla.fill((0,0,0))
                 pantalla.blit(imagen_fondo_win,(0,0))
-
                 crear_boton(pantalla, "MENU", blanco, rect_btn_menu_principal_win, azul, azul, fuente)
                 crear_boton(pantalla, "REINICIAR", blanco, rect_btn_reiniciar_win, azul, azul, fuente)
                 crear_boton(pantalla, "CONTINUAR", blanco, rect_btn_continuar_win, azul, azul, fuente)
                 mostrar_texto(pantalla,"MAX SCORE:" + puntaje_maximo[0]["puntaje_maximo"],fuente,cordenada_arriba_derecha,blanco)
-                mostrar_texto(pantalla,f"SCORE: {score}",fuente,cordenada_arriba_izquierda,blanco)
-
-                indicar =  pantalla_fin(rect_btn_menu_principal_win, rect_btn_reiniciar_win, rect_btn_continuar_win)
+                mostrar_texto(pantalla,f"SCORE: {dict_contadores['score']}",fuente,cordenada_arriba_izquierda,blanco)
+                indicar = pantalla_fin(rect_btn_menu_principal_win, rect_btn_reiniciar_win, rect_btn_continuar_win)
                 if indicar == 1:
                     respawn= False
                     continuar_jugando = False
@@ -379,17 +207,14 @@ while True:
                     continuar_jugando = False
                 elif indicar == 3:
                     correr_progama = True
-                    contador_continuar +=1        
+                    dict_contadores["contador_continuar"] +=1        
             else:
-                sonido_game_over.play()
+                #sonido_game_over.play()
                 pantalla.blit(imagen_fondo_final,(0,0))
-
                 crear_boton(pantalla, "MENU", blanco, rect_btn_menu_principal, rojo, rojo, fuente)
                 crear_boton(pantalla, "REINICIAR", blanco, rect_btn_reiniciar, rojo, rojo, fuente) 
-
-                mostrar_texto(pantalla,f"SCORE: {score}",fuente,cordenada_arriba_izquierda,blanco)
+                mostrar_texto(pantalla,f"SCORE: {dict_contadores['score']}",fuente,cordenada_arriba_izquierda,blanco)
                 mostrar_texto(pantalla,"MAX SCORE:" + puntaje_maximo[0]["puntaje_maximo"],fuente,cordenada_arriba_derecha,blanco)
-
                 indicar = pantalla_fin(rect_btn_menu_principal ,rect_btn_reiniciar)
                 if indicar == 1:
                     respawn = False
@@ -397,9 +222,7 @@ while True:
                 elif indicar == 2:
                     continuar_jugando =  False
                 elif indicar == 3:
-                    correr_progama = True    
-                          
-
+                    correr_progama = True           
             musica_juego.play()
         
 
