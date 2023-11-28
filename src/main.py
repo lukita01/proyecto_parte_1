@@ -65,10 +65,13 @@ while True:
                 for evento in pygame.event.get():
                     # CAPTURA LOS EVENTOS DE TECLADO DEL PERSONAJE 
                     evento_movimientos_personaje(evento , dict_movimientos ,  personaje_rifle)
+
                     # CAPTURA LOS EVENTOS DE CAMBIO DE ARMA CON LOS BOTONES
                     evento_cambio_de_arma(evento, dict_armas, dict_contadores["municion_ak"])
+
                     # CAPTURA TODOS LOS EVENTOS DE TIEMPO COMO RESPAW DE BOTIQUINES,AK,ETC...
                     eventos_de_tiempo( evento, dict_eventos_tiempo)
+
                     #CAPTURA LOS CLICKS DE DISPAROS CON EL MOUSE
                     evento_mouse_disparos(evento , dict_armas, personaje_rifle, rafagas , dict_eventos_tiempo ,dict_contadores)
 
@@ -77,7 +80,9 @@ while True:
 
                 #MOVIENTO DE LOS ZOMBIES
                 movimiento_zombies(lista_zombies_normales, speed_zombie_normal , dict_contadores )
+
                 movimiento_zombies_rojos(lista_zombies_rojos, speed_zombie_rojo , dict_contadores )     
+                
                 movimiento_zombies_jefes(lista_zombies_jefes, speed_zombie_jefe , dict_contadores )       
 
                 # MOVIENTO DE DISPARO
@@ -209,7 +214,7 @@ while True:
                     correr_progama = True
                     dict_contadores["contador_continuar"] +=1        
             else:
-                #sonido_game_over.play()
+                sonido_game_over.play()
                 pantalla.blit(imagen_fondo_final,(0,0))
                 crear_boton(pantalla, "MENU", blanco, rect_btn_menu_principal, rojo, rojo, fuente)
                 crear_boton(pantalla, "REINICIAR", blanco, rect_btn_reiniciar, rojo, rojo, fuente) 
